@@ -1,0 +1,8 @@
+{
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.diagnostics.globals": [
+        "ngx",
+        "ndk",
+        "newproxy"
+    ]
+}
