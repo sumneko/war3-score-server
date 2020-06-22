@@ -1,9 +1,8 @@
 local score = require 'script.score'
 
-ngx.req.read_body()  -- explicitly read the req body
+ngx.req.read_body()
 local data = ngx.req.get_body_data()
 if data then
-    ngx.say("body data:")
-    ngx.print(data)
+    score.test()
     return
 end
