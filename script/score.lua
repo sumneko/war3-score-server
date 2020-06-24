@@ -20,23 +20,23 @@ end
 
 local m = {}
 
-function m.test()
+function m.test(data)
     doRedis(function (red)
-        local res, err = red:get 'test'
-        if not res then
-            ngx.say(err)
-            return
-        end
-
-        local newValue = (tonumber(res) or 0) + 1
-        local ok, err = red:set('test', newValue)
+        local ok, err = red:incrby('test', 10)
         if not ok then
             ngx.say(err)
             return
         end
 
-        ngx.say('test = ', newValue)
+        ngx.say('test = ', red:get('test'))
     end)
+end
+
+function m.ping(data)
+    return {
+        type  = 'pong',
+        value = ('hello %s!'):format(data.value),
+    }
 end
 
 return m
