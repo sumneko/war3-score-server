@@ -1,5 +1,8 @@
 local lpack = require 'lpack'
 
+local schar   = string.char
+local tunpack = _G.unpack or table.unpack
+
 for k, v in pairs(lpack) do
     string[k] = v
 end
@@ -129,13 +132,26 @@ function decodeValue(stream, index)
     end
 end
 
+local function revert(stream, n)
+    local t = {stream:byte(1, -1)}
+    for i = 1, #t do
+        t[i] = (t[i] + n * i) % 256
+    end
+    return schar(tunpack(t))
+end
+
 local function encode(o)
     local buf = {}
     encodeValue(buf, o)
-    return table.concat(buf)
+    local stream = table.concat(buf)
+    -- 翻转全部字节
+    stream = revert(stream, 131)
+    return stream
 end
 
 local function decode(stream)
+    -- 翻转全部字节
+    stream = revert(stream, -131)
     return decodeValue(stream, 1)
 end
 
