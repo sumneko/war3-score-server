@@ -47,7 +47,7 @@ function m.hello(data)
         red:zincrby('hello', 1, ip)
         local count = red:zscore('hello', ip)
         local max = 10
-        local list = red:zrevrange('hello', -max, -1, 'WITHSCORES')
+        local list = red:zrevrange('hello', 0, max-1, 'WITHSCORES')
         local lines = {}
         lines[#lines+1] = '======= 排行榜 ======='
         for i = 1, max do
