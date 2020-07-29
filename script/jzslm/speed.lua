@@ -57,7 +57,7 @@ local function checkPlayersRecord(redis, data)
     for _, player in pairs(data.players) do
         local name    = player.name
         local class   = player.class
-        local oldTime = tonumber(redis:hget(keyTime, player))
+        local oldTime = tonumber(redis:hget(keyTime, name))
         if oldTime and oldTime <= newTime then
             results[name] = {
                 name   = name,
@@ -67,8 +67,8 @@ local function checkPlayersRecord(redis, data)
                 new    = newTime,
             }
         else
-            redis:hset(keyTime, player, ('%.3f'):format(newTime))
-            redis:hset(keyClass, player, class)
+            redis:hset(keyTime, name, ('%.3f'):format(newTime))
+            redis:hset(keyClass, name, class)
             results[name] = {
                 name   = name,
                 class  = class,
@@ -88,6 +88,22 @@ function m.report(redis, data)
         group   = groupData,
         players = playersData,
     }
+end
+
+function m.get(redis, data)
+    local keyTime  = KEY_PLAYER_TIME .. data.group
+    local keyClass = KEY_PLAYER_CLASS .. data.group
+    local player   = data.player
+    local time = tonumber(redis:hget(keyTime, player))
+    if time then
+        local class = redis:hget(keyClass, player)
+        return {
+            time  = time,
+            class = class,
+        }
+    else
+        return nil
+    end
 end
 
 function m.getRank(redis, range)
