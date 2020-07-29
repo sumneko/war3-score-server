@@ -81,6 +81,27 @@ local function checkPlayersRecord(redis, data)
     return results
 end
 
+local function zrange(redis, key, start, finish)
+    local list = redis:zrange(key, start - 1, finish - 1, 'WITHSCORES')
+    local fields = {}
+    local scores = {}
+    for i = 1, finish - start + 1 do
+        local field = list[i * 2 - 1]
+        local score = list[i * 2]
+        if not field then
+            break
+        end
+        fields[i] = field
+        scores[i] = score
+    end
+    return fields, scores
+end
+
+local function unpackList(buf)
+    local f = assert(loadstring('return' .. buf))
+    return {f()}
+end
+
 function m.report(redis, data)
     local groupData = checkGroupRecord(redis, data)
     local playersData = checkPlayersRecord(redis, data)
@@ -106,7 +127,33 @@ function m.get(redis, data)
     end
 end
 
-function m.getRank(redis, range)
+function m.getRank(redis, data)
+    local keyTime  = KEY_GROUP_TIME .. data.group
+    local keyClass = KEY_GROUP_CLASS .. data.group
+
+    local results = {}
+    local uids, times = zrange(redis, keyTime, data.start, data.finish)
+    for i, uid in ipairs(uids) do
+        local time    = tonumber(times[i])
+        local qClass  = redis:hget(keyClass, uid)
+        local names   = unpackList(uid)
+        local class   = unpackList(qClass)
+        local players = {}
+        for x, name in ipairs(names) do
+            players[x] = {
+                name  = name,
+                class = class[x]
+            }
+        end
+        results[i] = {
+            rank    = data.start + i - 1,
+            time    = time,
+            players = players,
+        }
+    end
+    return {
+        ranks = results,
+    }
 end
 
 return m
