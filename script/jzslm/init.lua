@@ -1,16 +1,16 @@
 local messager = require 'script.messager'
 local redis    = require 'script.redis'
-local score    = require 'script.test.score'
+local speed    = require 'script.jzslm.speed'
 
 local data = messager.recive()
 if not data then
     return
 end
 local response
-if data.type == 'ping' then
-    response = redis(score.ping, data)
-elseif data.type == 'hello' then
-    response = redis(score.hello, data)
+if data.type == 'speedReport' then
+    response = redis(speed.report, data.value)
+elseif data.type == 'getSpeedRank' then
+    response = redis(speed.getRank, data.value)
 else
     response = ('Unkown Data Type: %s'):format(data.type)
 end
