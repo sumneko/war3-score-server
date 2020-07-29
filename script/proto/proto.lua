@@ -32,8 +32,12 @@ local function encodeBoolean(buf, b)
     end
 end
 
+local function isInteger(n)
+    return n % 1 == 0
+end
+
 local function encodeNumber(buf, n)
-    if math.type(n) == 'integer' then
+    if isInteger(n) == 'integer' then
         if n == 0 then
             buf[#buf+1] = TYPE.INT0
             return
