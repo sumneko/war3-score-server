@@ -1,30 +1,47 @@
 local m = {}
 
-local KEY_GROUP  = 'jzslm:speed.group'
-local KEY_PLAYER = 'jzslm:speed.player'
+local KEY_GROUP_TIME   = 'jzslm:speed.group.time'
+local KEY_PLAYER_TIME  = 'jzslm:speed.player.time'
+local KEY_GROUP_CLASS  = 'jzslm:speed.group.class.'
+local KEY_PLAYER_CLASS = 'jzslm:speed.player.class.'
 
-local function getGroupUID(players)
+local function getGroupUIDandClass(players)
     local names = {}
-    for _, name in pairs(players) do
-        names[#names+1] = ('%q'):format(name)
+    local classMap = {}
+    for _, player in pairs(players) do
+        local qName = ('%q'):format(player.name)
+        local qClass = ('%q'):format(player.class)
+        names[#names+1] = qName
+        classMap[qName] = qClass
     end
     table.sort(names)
-    return table.concat(names, ',')
+    local class = {}
+    for _, name in ipairs(names) do
+        class[#class+1] = classMap[name]
+    end
+    return table.concat(names, ','), table.concat(class, ',')
 end
 
 local function checkGroupRecord(redis, data)
-    local uid     = getGroupUID(data.players)
-    local newTime = data.time
-    local oldTime = tonumber(redis:zscore(KEY_GROUP, uid))
+    local uid, class = getGroupUIDandClass(data.players)
+    local keyTime    = KEY_GROUP_TIME .. data.group
+    local keyClass   = KEY_GROUP_CLASS .. data.group
+    local newTime    = data.time
+    local oldTime    = tonumber(redis:zscore(keyTime, uid))
     if oldTime and oldTime <= newTime then
         return {
+            name   = uid,
+            class  = class,
             result = false,
             old    = oldTime,
             new    = newTime,
         }
     else
-        redis:zadd(KEY_GROUP, ('%.3f'):format(newTime), uid)
+        redis:zadd(keyTime, ('%.3f'):format(newTime), uid)
+        redis:hset(keyClass, uid, class)
         return {
+            name   = uid,
+            class  = class,
             result = true,
             old    = oldTime,
             new    = newTime,
@@ -33,19 +50,28 @@ local function checkGroupRecord(redis, data)
 end
 
 local function checkPlayersRecord(redis, data)
-    local newTime = data.time
-    local results = {}
+    local keyTime  = KEY_PLAYER_TIME .. data.group
+    local keyClass = KEY_PLAYER_CLASS .. data.group
+    local newTime  = data.time
+    local results  = {}
     for _, player in pairs(data.players) do
-        local oldTime = tonumber(redis:hget(KEY_PLAYER, player))
+        local name    = player.name
+        local class   = player.class
+        local oldTime = tonumber(redis:hget(keyTime, player))
         if oldTime and oldTime <= newTime then
-            results[player] = {
+            results[name] = {
+                name   = name,
+                class  = class,
                 result = false,
                 old    = oldTime,
                 new    = newTime,
             }
         else
-            redis:hset(KEY_PLAYER, player, ('%.3f'):format(newTime))
-            results[player] = {
+            redis:hset(keyTime, player, ('%.3f'):format(newTime))
+            redis:hset(keyClass, player, class)
+            results[name] = {
+                name   = name,
+                class  = class,
                 result = true,
                 old    = oldTime,
                 new    = newTime,
