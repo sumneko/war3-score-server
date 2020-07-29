@@ -8,6 +8,7 @@ for k, v in pairs(lpack) do
 end
 
 local TYPE = {
+    NIL      = 'N',
     TRUE     = 'T',
     FALSE    = 'F',
     INT0     = '0',
@@ -30,6 +31,10 @@ local function encodeBoolean(buf, b)
     else
         buf[#buf+1] = TYPE.FALSE
     end
+end
+
+local function encodeNil(buf, b)
+    buf[#buf+1] = TYPE.NIL
 end
 
 local function isInteger(n)
@@ -84,6 +89,8 @@ function encodeValue(buf, o)
     local tp = type(o)
     if tp == 'boolean' then
         encodeBoolean(buf, o)
+    elseif tp == 'nil' then
+        encodeNil(buf, o)
     elseif tp == 'number' then
         encodeNumber(buf, o)
     elseif tp == 'string' then
@@ -102,6 +109,8 @@ function decodeValue(stream, index)
         return true, index
     elseif ot == TYPE.FALSE then
         return false, index
+    elseif ot == TYPE.NIL then
+        return nil, index
     elseif ot == TYPE.INT0 then
         return 0, index
     elseif ot == TYPE.INT then
