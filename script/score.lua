@@ -62,7 +62,7 @@ function m.hello(data)
 
         return {
             type = 'print',
-            value = ('你好，来自 %s 的 %s ，你已成功连接服务器。这是你的第 %d 次连接。\n%s'):format(ip, data.value, count, table.concat(lines, '\n'))
+            value = ('你好，来自 %s 的 %s ，你已成功连接服务器。这是你的第 %d 次连接。\n%s'):format(ip, data.source, count, table.concat(lines, '\n'))
         }
     end)
 end
