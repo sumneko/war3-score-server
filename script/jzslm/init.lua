@@ -1,6 +1,7 @@
 local messager = require 'script.messager'
 local redis    = require 'script.redis'
 local speed    = require 'script.jzslm.speed'
+local money    = require 'script.jzslm.money'
 
 local data = messager.recive()
 if not data then

@@ -1,11 +1,23 @@
-local timer = require 'script.timer'
+local util = require 'script.utility'
+local KEY  = require 'script.jzslm.key'
 
 local m = {}
 
-local KEY_GROUP_TIME   = 'jzslm:speed.group.time'
-local KEY_PLAYER_TIME  = 'jzslm:speed.player.time'
-local KEY_GROUP_CLASS  = 'jzslm:speed.group.class.'
-local KEY_PLAYER_CLASS = 'jzslm:speed.player.class.'
+local function initGroup(redis, group)
+    local groups = redis:get(KEY.GROUPS)
+    if groups == ngx.null then
+        redis:set(KEY.GROUPS, util.packList { group })
+    else
+        local list = util.unpackList(groups)
+        for _, g in ipairs(list) do
+            if g == group then
+                return
+            end
+        end
+        list[#list+1] = group
+        redis:set(KEY.GROUPS, util.packList(list, true))
+    end
+end
 
 local function getGroupUIDandClass(players)
     local names = {}
@@ -26,10 +38,11 @@ end
 
 local function checkGroupRecord(redis, data)
     local uid, class = getGroupUIDandClass(data.players)
-    local keyTime    = KEY_GROUP_TIME .. data.group
-    local keyClass   = KEY_GROUP_CLASS .. data.group
+    local keyTime    = KEY.GROUP_TIME .. data.group
+    local keyClass   = KEY.GROUP_CLASS .. data.group
     local newTime    = data.time
     local oldTime    = tonumber(redis:zscore(keyTime, uid))
+    initGroup(redis, data.group)
     if oldTime and oldTime <= newTime then
         return {
             name   = uid,
@@ -52,8 +65,8 @@ local function checkGroupRecord(redis, data)
 end
 
 local function checkPlayersRecord(redis, data)
-    local keyTime  = KEY_PLAYER_TIME .. data.group
-    local keyClass = KEY_PLAYER_CLASS .. data.group
+    local keyTime  = KEY.PLAYER_TIME .. data.group
+    local keyClass = KEY.PLAYER_CLASS .. data.group
     local newTime  = data.time
     local results  = {}
     for _, player in pairs(data.players) do
@@ -83,27 +96,6 @@ local function checkPlayersRecord(redis, data)
     return results
 end
 
-local function zrange(redis, key, start, finish)
-    local list = redis:zrange(key, start - 1, finish - 1, 'WITHSCORES')
-    local fields = {}
-    local scores = {}
-    for i = 1, finish - start + 1 do
-        local field = list[i * 2 - 1]
-        local score = list[i * 2]
-        if not field then
-            break
-        end
-        fields[i] = field
-        scores[i] = score
-    end
-    return fields, scores
-end
-
-local function unpackList(buf)
-    local f = assert(loadstring('return' .. buf))
-    return {f()}
-end
-
 function m.report(redis, data)
     local groupData = checkGroupRecord(redis, data)
     local playersData = checkPlayersRecord(redis, data)
@@ -114,8 +106,8 @@ function m.report(redis, data)
 end
 
 function m.get(redis, data)
-    local keyTime  = KEY_PLAYER_TIME .. data.group
-    local keyClass = KEY_PLAYER_CLASS .. data.group
+    local keyTime  = KEY.PLAYER_TIME .. data.group
+    local keyClass = KEY.PLAYER_CLASS .. data.group
     local player   = data.player
     local time = tonumber(redis:hget(keyTime, player))
     if time then
@@ -130,16 +122,16 @@ function m.get(redis, data)
 end
 
 function m.getRank(redis, data)
-    local keyTime  = KEY_GROUP_TIME .. data.group
-    local keyClass = KEY_GROUP_CLASS .. data.group
+    local keyTime  = KEY.GROUP_TIME .. data.group
+    local keyClass = KEY.GROUP_CLASS .. data.group
 
     local results = {}
-    local uids, times = zrange(redis, keyTime, data.start, data.finish)
+    local uids, times = util.zrange(redis, keyTime, data.start, data.finish)
     for i, uid in ipairs(uids) do
         local time    = tonumber(times[i])
         local qClass  = redis:hget(keyClass, uid)
-        local names   = unpackList(uid)
-        local class   = unpackList(qClass)
+        local names   = util.unpackList(uid)
+        local class   = util.unpackList(qClass)
         local players = {}
         for x, name in ipairs(names) do
             players[x] = {
@@ -157,13 +149,5 @@ function m.getRank(redis, data)
         ranks = results,
     }
 end
-
-local function checkAward()
-    local currentTime = os.time()
-end
-
-timer.onTick(function ()
-    checkAward()
-end)
 
 return m
