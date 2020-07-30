@@ -3,31 +3,63 @@ local redis = require 'script.redis'
 local util  = require 'script.utility'
 local KEY   = require 'script.jzslm.key'
 
-local function unpackList(buf)
-    local f = assert(loadstring('return' .. buf))
-    return {f()}
+local speedReward = {
+    {  1,       100},
+    {  2,        64},
+    {  3,        47},
+    { 10,        35},
+    {100,        28},
+    {500,        23},
+    {math.huge,  20},
+}
+
+local m = {}
+
+function m.add(red, player, name, value)
+    red:hincrbyfloat(KEY.MONEY .. name, player, value)
 end
 
-local function doAward(red, state, min, max, award)
-    if not state.mark then
-        state.mark = {}
-    end
-    local uids, times = util.zrange(red, KEY)
+function m.get(red, player, name)
+    return tonumber(red:hget(KEY.MONEY .. name, player)) or 0
 end
 
 local function checkAward(time, date)
     if date.hour == 23 and date.min == 50 and date.sec == 0 then
-        local state = {}
-        redis.call(doAward, state, 001, 001, 100)
-        redis.call(doAward, state, 002, 002, 064)
-        redis.call(doAward, state, 003, 003, 047)
-        redis.call(doAward, state, 004, 010, 035)
-        redis.call(doAward, state, 011, 100, 028)
-        redis.call(doAward, state, 101, 500, 023)
-        redis.call(doAward, state, 501, -01, 020)
+        local red = redis.get()
+        local groups = red:get(KEY.GROUPS)
+        if groups == ngx.null then
+            return
+        end
+        local list = util.unpackList(groups)
+
+        -- 计算每个玩家在所有排行榜中的最高名次
+        local maxRank = {}
+        for _, group in ipairs(list) do
+            local uids = util.zrange(red, KEY.GROUP_TIME .. group, 1, -1)
+            for rank, uid in ipairs(uids) do
+                local players = util.unpackList(uid)
+                for _, player in ipairs(players) do
+                    if not maxRank[player] or maxRank[player] > rank then
+                        maxRank[player] = rank
+                    end
+                end
+            end
+        end
+
+        -- 根据每个玩家的最高名次来发送奖励
+        for player, rank in pairs(maxRank) do
+            for _, data in ipairs(speedReward) do
+                if rank <= data[1] then
+                    m.add(red, player, '声望', data[2])
+                    break
+                end
+            end
+        end
     end
 end
 
 timer.onTick(function ()
     checkAward()
 end)
+
+return m
