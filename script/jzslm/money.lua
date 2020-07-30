@@ -15,12 +15,16 @@ local speedReward = {
 
 local m = {}
 
-function m.add(red, player, name, value)
+local function addMoney(red, player, name, value)
     red:hincrbyfloat(KEY.MONEY .. name, player, value)
 end
 
-function m.get(red, player, name)
+local function getMoney(red, player, name)
     return tonumber(red:hget(KEY.MONEY .. name, player)) or 0
+end
+
+function m.get(red, data)
+    return getMoney(red, data.player, data.name)
 end
 
 local function checkAward(time, date)
@@ -50,7 +54,7 @@ local function checkAward(time, date)
         for player, rank in pairs(maxRank) do
             for _, data in ipairs(speedReward) do
                 if rank <= data[1] then
-                    m.add(red, player, '声望', data[2])
+                    addMoney(red, player, '声望', data[2])
                     break
                 end
             end
