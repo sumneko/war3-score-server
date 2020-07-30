@@ -8,9 +8,9 @@ if not data then
 end
 local response
 if data.type == 'ping' then
-    response = redis(score.ping, data)
+    response = redis.call(score.ping, data)
 elseif data.type == 'hello' then
-    response = redis(score.hello, data)
+    response = redis.call(score.hello, data)
 else
     response = ('Unkown Data Type: %s'):format(data.type)
 end

@@ -1,3 +1,5 @@
+local timer = require 'script.timer'
+
 local m = {}
 
 local KEY_GROUP_TIME   = 'jzslm:speed.group.time'
@@ -155,5 +157,13 @@ function m.getRank(redis, data)
         ranks = results,
     }
 end
+
+local function checkAward()
+    local currentTime = os.time()
+end
+
+timer.onTick(function ()
+    checkAward()
+end)
 
 return m

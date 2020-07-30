@@ -8,11 +8,11 @@ if not data then
 end
 local response
 if data.type == 'speedReport' then
-    response = redis(speed.report, data.value)
+    response = redis.call(speed.report, data.value)
 elseif data.type == 'getPlayerSpeed' then
-    response = redis(speed.get, data.value)
+    response = redis.call(speed.get, data.value)
 elseif data.type == 'getSpeedRank' then
-    response = redis(speed.getRank, data.value)
+    response = redis.call(speed.getRank, data.value)
 else
     return
 end
