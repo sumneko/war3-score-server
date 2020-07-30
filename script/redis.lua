@@ -11,12 +11,6 @@ function m.get()
         return nil
     end
 
-    local ok, err = red:set_keepalive(10000, 100)
-    if not ok then
-        ngx.say("failed to set keepalive: ", err)
-        return nil
-    end
-
     return red
 end
 
