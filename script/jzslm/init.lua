@@ -16,6 +16,8 @@ elseif data.type == 'getSpeedRank' then
     response = redis.call(speed.getRank, data.value)
 elseif data.type == 'getMoney' then
     response = redis.call(money.get, data.value)
+elseif data.type == 'costMoney' then
+    response = redis.call(money.cost, data.value)
 else
     return
 end
