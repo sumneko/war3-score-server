@@ -37,7 +37,7 @@ local common_cmds = {
     "smembers", "sismember",    "sadd",     "srem",
     "sdiff",    "sinter",       "sunion",               -- Sets
     "zrange",   "zrangebyscore", "zrank",   "zadd",
-    "zrem",     "zincrby",                              -- Sorted Sets
+    "zrem",     "zincrby",      "zrevrange",            -- Sorted Sets
     "auth",     "eval",         "expire",   "script",
     "sort"                                              -- Others
 }
