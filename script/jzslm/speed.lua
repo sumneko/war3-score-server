@@ -104,13 +104,16 @@ local function findPlayerRank(redis, player)
     if not score then
         return nil
     end
-    local uids  = util.zrangebyscore(redis, KEY.GROUP_SCORE, score, score)
+    local uids  = util.zrevrangebyscore(redis, KEY.GROUP_SCORE, score, score)
     for _, uid in ipairs(uids) do
         local players = util.unpackList(uid)
         for i = 1, #players do
             if players[i] == player then
                 local rank = tonumber((redis:zrevrank(KEY.GROUP_SCORE, uid)))
-                return rank
+                if not rank then
+                    return nil
+                end
+                return rank + 1
             end
         end
     end
@@ -124,7 +127,7 @@ function m.get(redis, data)
         return {
             time  = time,
             level = tonumber((redis:hget(KEY.PLAYER_LEVEL, player))),
-            class = tonumber((redis:hget(KEY.PLAYER_CLASS, player))),
+            class = redis:hget(KEY.PLAYER_CLASS, player),
             rank  = findPlayerRank(redis, player),
         }
     else

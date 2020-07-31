@@ -22,11 +22,11 @@ function m.call(callback, ...)
 
     local res = callback(red, ...)
 
-    local ok, err = red:set_keepalive(10000, 100)
-    if not ok then
-        ngx.say("failed to set keepalive: ", err)
-        return nil
-    end
+    --local ok, err = red:set_keepalive(10000, 100)
+    --if not ok then
+    --    ngx.say("failed to set keepalive: ", err)
+    --    return nil
+    --end
 
     return res
 end
