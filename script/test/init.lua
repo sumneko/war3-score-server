@@ -1,18 +1,39 @@
 local messager = require 'script.messager'
+local code     = require 'script.code'
 local redis    = require 'script.redis'
 local score    = require 'script.test.score'
 
-local data = messager.recive()
+local data, err = messager.recive()
 if not data then
+    messager.response {
+        result  = false,
+        error   = code.ERROR_PROTO_ERROR,
+        message = err,
+    }
     return
 end
-local response
-if data.type == 'ping' then
-    response = redis.call(score.ping, data)
-elseif data.type == 'hello' then
-    response = redis.call(score.hello, data)
-else
-    response = ('Unkown Data Type: %s'):format(data.type)
+
+local function call()
+    if data.type == 'ping' then
+        return redis.call(score.ping, data)
+    elseif data.type == 'hello' then
+        return redis.call(score.hello, data)
+    end
+    error('Unknown proto:' .. tostring(data.type))
 end
 
-messager.response(response)
+local suc, res = xpcall(call, debug.traceback)
+if not suc then
+    ngx.log(ngx.ERR, res)
+    messager.response {
+        result  = false,
+        error   = code.ERROR_RUNTIME,
+        message = err,
+    }
+    return
+end
+
+messager.response {
+    result = true,
+    value  = res,
+}

@@ -155,9 +155,7 @@ function m.getRank(redis, data)
             players = players,
         }
     end
-    return {
-        ranks = results,
-    }
+    return results
 end
 
 return m

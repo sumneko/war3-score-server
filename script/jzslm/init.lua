@@ -1,28 +1,46 @@
 local messager = require 'script.messager'
+local code     = require 'script.code'
 local redis    = require 'script.redis'
 local speed    = require 'script.jzslm.speed'
 local money    = require 'script.jzslm.money'
 
-local data = messager.recive()
+local data, err = messager.recive()
 if not data then
-    return
-end
-local response
-if data.type == 'speedReport' then
-    response = redis.call(speed.report, data.value)
-elseif data.type == 'getPlayerSpeed' then
-    response = redis.call(speed.get, data.value)
-elseif data.type == 'getSpeedRank' then
-    response = redis.call(speed.getRank, data.value)
-elseif data.type == 'getMoney' then
-    response = redis.call(money.get, data.value)
-elseif data.type == 'costMoney' then
-    response = redis.call(money.cost, data.value)
-else
+    messager.response {
+        result  = false,
+        error   = code.ERROR_PROTO_ERROR,
+        message = err,
+    }
     return
 end
 
-if type(response) == 'table' then
-    response.request = data.type
+local function call()
+    if data.type == 'speedReport' then
+        return redis.call(speed.report, data.value)
+    elseif data.type == 'getPlayerSpeed' then
+        return redis.call(speed.get, data.value)
+    elseif data.type == 'getSpeedRank' then
+        return redis.call(speed.getRank, data.value)
+    elseif data.type == 'getMoney' then
+        return redis.call(money.get, data.value)
+    elseif data.type == 'costMoney' then
+        return redis.call(money.cost, data.value)
+    end
+    error('Unknown proto:' .. tostring(data.type))
 end
-messager.response(response)
+
+local suc, res = xpcall(call, debug.traceback)
+if not suc then
+    ngx.log(ngx.ERR, res)
+    messager.response {
+        result  = false,
+        error   = code.ERROR_RUNTIME,
+        message = err,
+    }
+    return
+end
+
+messager.response {
+    result = true,
+    value  = res,
+}

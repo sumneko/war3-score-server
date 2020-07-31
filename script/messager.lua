@@ -8,18 +8,18 @@ function m.recive()
     local stream = ngx.req.get_body_data()
     if not stream then
         ngx.log(ngx.ERR, '没有收到数据？')
-        return nil
+        return nil, 'no data'
     end
 
-    local suc, zstream = pcall(zero.decode, stream)
+    local suc, zstream = xpcall(zero.decode, debug.traceback, stream)
     if not suc then
         ngx.log(ngx.ERR, zstream, ('%q'):format(stream))
-        return nil
+        return nil, zstream
     end
-    local suc, data = pcall(proto.decode, zstream)
+    local suc, data = xpcall(proto.decode, debug.traceback, zstream)
     if not suc then
         ngx.log(ngx.ERR, data, ('%q'):format(zstream))
-        return
+        return nil, data
     end
 
     return data
