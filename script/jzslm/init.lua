@@ -33,6 +33,7 @@ local suc, res = xpcall(call, debug.traceback)
 if not suc then
     ngx.log(ngx.ERR, res)
     messager.response {
+        request = data.type,
         result  = false,
         error   = code.ERROR_RUNTIME,
         message = err,
@@ -41,6 +42,7 @@ if not suc then
 end
 
 messager.response {
-    result = true,
-    value  = res,
+    request = data.type,
+    result  = true,
+    value   = res,
 }
