@@ -51,34 +51,51 @@ end
 local function checkAward(time, date)
     if date.hour == 23 and date.min == 50 and date.sec == 0 then
         local red = redis.get()
-        local groups = red:get(KEY.GROUPS)
-        if groups == ngx.null then
-            return
-        end
-        local list = util.unpackList(groups)
+        os.execute('md logs/reward')
+        local f = io.open(('logs/reward/%04d-%02d-%02d.log'):format(
+            date.year,
+            date.month,
+            date.day
+        ), 'wb')
 
-        -- 计算每个玩家在所有排行榜中的最高名次
+        -- 计算每个玩家在排行榜中的最高名次
+        if f then
+            f:write('=====排行榜一览=====\n')
+        end
         local maxRank = {}
-        for _, group in ipairs(list) do
-            local uids = util.zrange(red, KEY.GROUP_TIME .. group, 1, -1)
-            for rank, uid in ipairs(uids) do
-                local players = util.unpackList(uid)
-                for _, player in ipairs(players) do
-                    if not maxRank[player] or maxRank[player] > rank then
-                        maxRank[player] = rank
-                    end
+        local uids = util.zrevrange(red, KEY.GROUP_SCORE, 1, -1)
+        for rank, uid in ipairs(uids) do
+            if f then
+                f:write(rank, '\t', uid, '\n')
+            end
+            local players = util.unpackList(uid)
+            for _, player in ipairs(players) do
+                if not maxRank[player] or maxRank[player] > rank then
+                    maxRank[player] = rank
                 end
             end
         end
 
         -- 根据每个玩家的最高名次来发送奖励
+        if f then
+            f:write('=====玩家一览=====\n')
+        end
         for player, rank in pairs(maxRank) do
-            for _, data in ipairs(speedReward) do
+            if f then
+                f:write(player, '\t', rank, '\n')
+            end
+            for level, data in ipairs(speedReward) do
                 if rank <= data[1] then
+                    if f then
+                        f:write('\t', level, '\n', data[2], '\n')
+                    end
                     addMoney(red, player, '声望', data[2])
                     break
                 end
             end
+        end
+        if f then
+            f:close()
         end
     end
 end

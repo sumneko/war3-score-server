@@ -26,6 +26,7 @@ function m.recive()
 end
 
 function m.response(data)
+    ngx.log(ngx.INFO, 'response: ', data.request, ' ', data.result)
     local rstream = zero.encode(proto.encode(data))
     ngx.print(rstream)
 end
