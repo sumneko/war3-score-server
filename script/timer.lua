@@ -29,6 +29,7 @@ function m._updateTicks()
 end
 
 function m.update()
+    ngx.log(ngx.INFO, 'update')
     m._updateTicks()
 end
 
