@@ -29,7 +29,7 @@ if not suc then
         request = data.type,
         result  = false,
         error   = code.ERROR_RUNTIME,
-        message = err,
+        message = res,
     }
     return
 end

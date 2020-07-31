@@ -3,7 +3,7 @@ local m = {}
 m._tickList = {}
 m._curTick = nil
 
-function m.everyTick(callback)
+function m.onTick(callback)
     m._tickList[#m._tickList+1] = callback
 end
 

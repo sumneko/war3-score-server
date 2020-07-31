@@ -57,7 +57,7 @@ local function checkPlayersRecord(redis, data, newScore)
     for _, player in pairs(data.players) do
         local name     = player.name
         local class    = player.class
-        local oldScore = tonumber(redis:hget(KEY.PLAYER_SCORE, name))
+        local oldScore = tonumber((redis:hget(KEY.PLAYER_SCORE, name)))
         if oldScore and oldScore >= newScore then
             results[name] = {
                 name   = name,
@@ -65,12 +65,12 @@ local function checkPlayersRecord(redis, data, newScore)
                 result = false,
             }
         else
-            local oldTime  = tonumber(redis:hget(KEY.PLAYER_TIME,  name))
-            local oldLevel = tonumber(redis:hget(KEY.PLAYER_LEVEL, name))
-            redis:zadd(KEY.PLAYER_SCORE, newScore, name)
-            redis:hset(KEY.PLAYER_CLASS, name,     class)
-            redis:hset(KEY.PLAYER_TIME,  name,     data.time)
-            redis:hset(KEY.PLAYER_LEVEL, name,     data.level)
+            local oldTime  = tonumber((redis:hget(KEY.PLAYER_TIME,  name)))
+            local oldLevel = tonumber((redis:hget(KEY.PLAYER_LEVEL, name)))
+            redis:hset(KEY.PLAYER_SCORE, name, newScore)
+            redis:hset(KEY.PLAYER_CLASS, name, class)
+            redis:hset(KEY.PLAYER_TIME,  name, data.time)
+            redis:hset(KEY.PLAYER_LEVEL, name, data.level)
             results[name] = {
                 name   = name,
                 class  = class,
@@ -100,7 +100,7 @@ function m.report(redis, data)
 end
 
 local function findPlayerRank(redis, player)
-    local score = tonumber(redis:hget(KEY.PLAYER_SCORE, player))
+    local score = tonumber((redis:hget(KEY.PLAYER_SCORE, player)))
     if not score then
         return nil
     end
@@ -109,7 +109,7 @@ local function findPlayerRank(redis, player)
         local players = util.unpackList(uid)
         for i = 1, #players do
             if players[i] == player then
-                local rank = tonumber(redis:zrevrank(KEY.GROUP_SCORE, uid))
+                local rank = tonumber((redis:zrevrank(KEY.GROUP_SCORE, uid)))
                 return rank
             end
         end
@@ -119,12 +119,12 @@ end
 
 function m.get(redis, data)
     local player = data.player
-    local time = tonumber(redis:hget(KEY.PLAYER_TIME, player))
+    local time = tonumber((redis:hget(KEY.PLAYER_TIME, player)))
     if time then
         return {
             time  = time,
-            level = tonumber(redis:hget(KEY.PLAYER_LEVEL, player)),
-            class = tonumber(redis:hget(KEY.PLAYER_CLASS, player)),
+            level = tonumber((redis:hget(KEY.PLAYER_LEVEL, player))),
+            class = tonumber((redis:hget(KEY.PLAYER_CLASS, player))),
             rank  = findPlayerRank(redis, player),
         }
     else
@@ -136,8 +136,8 @@ function m.getRank(redis, data)
     local results = {}
     local uids = util.zrevrange(redis, KEY.GROUP_SCORE, data.start, data.finish)
     for i, uid in ipairs(uids) do
-        local time    = tonumber(redis:hget(KEY.GROUP_TIME,  uid))
-        local level   = tonumber(redis:hget(KEY.GROUP_LEVEL, uid))
+        local time    = tonumber((redis:hget(KEY.GROUP_TIME,  uid)))
+        local level   = tonumber((redis:hget(KEY.GROUP_LEVEL, uid)))
         local qClass  = redis:hget(KEY.GROUP_CLASS, uid)
         local names   = util.unpackList(uid)
         local class   = util.unpackList(qClass)

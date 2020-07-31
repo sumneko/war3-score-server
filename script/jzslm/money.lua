@@ -20,7 +20,7 @@ local function addMoney(red, player, name, value)
 end
 
 local function getMoney(red, player, name)
-    return tonumber(red:hget(KEY.MONEY .. name, player)) or 0
+    return tonumber((red:hget(KEY.MONEY .. name, player))) or 0
 end
 
 local function costMoney(red, player, name, value)
