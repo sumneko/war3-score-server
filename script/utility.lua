@@ -7,10 +7,26 @@ function m.zrange(redis, key, start, finish)
     if finish > 0 then
         finish = finish - 1
     end
-    local list = redis:zrange(key, start - 1, finish - 1, 'WITHSCORES')
+    local list = redis:zrange(key, start, finish, 'WITHSCORES')
     local fields = {}
     local scores = {}
     for i = 1, finish - start + 1 do
+        local field = list[i * 2 - 1]
+        local score = list[i * 2]
+        if not field then
+            break
+        end
+        fields[i] = field
+        scores[i] = score
+    end
+    return fields, scores
+end
+
+function m.zrangebyscore(redis, key, max, min)
+    local list = redis:zrangebyscore(key, max, min, 'WITHSCORES')
+    local fields = {}
+    local scores = {}
+    for i = 1, min - max + 1 do
         local field = list[i * 2 - 1]
         local score = list[i * 2]
         if not field then
