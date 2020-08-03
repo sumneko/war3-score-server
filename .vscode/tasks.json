@@ -5,16 +5,10 @@
     "type": "shell",
     "tasks": [
         {
-            "label": "📟重启服务",
+            "label": "🔥启动",
             "command": [
-                "taskkill /f /im nginx.exe &&",
-                "start nginx",
-            ]
-        },
-        {
-            "label": "🙈重载服务",
-            "command": [
-                "nginx -s reload",
+                "luajit.exe",
+                "启动.lua",
             ]
         },
     ]

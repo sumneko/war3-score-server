@@ -1,16 +1,18 @@
 local m = {}
 
 function m.zrange(redis, key, start, finish)
-    if start > 0 then
-        start = start - 1
+    local rs = start
+    local rf = finish
+    if rs > 0 then
+        rs = rs - 1
     end
-    if finish > 0 then
-        finish = finish - 1
+    if rf > 0 then
+        rf = rf - 1
     end
-    local list = redis:zrange(key, start, finish, 'WITHSCORES')
+    local list = redis:zrange(key, rs, rf, 'WITHSCORES')
     local fields = {}
     local scores = {}
-    for i = 1, finish - start + 1 do
+    for i = 1, #list / 2 do
         local field = list[i * 2 - 1]
         local score = list[i * 2]
         if not field then
@@ -23,16 +25,18 @@ function m.zrange(redis, key, start, finish)
 end
 
 function m.zrevrange(redis, key, start, finish)
-    if start > 0 then
-        start = start - 1
+    local rs = start
+    local rf = finish
+    if rs > 0 then
+        rs = rs - 1
     end
-    if finish > 0 then
-        finish = finish - 1
+    if rf > 0 then
+        rf = rf - 1
     end
-    local list = redis:zrevrange(key, start, finish, 'WITHSCORES')
+    local list = redis:zrevrange(key, rs, rf, 'WITHSCORES')
     local fields = {}
     local scores = {}
-    for i = 1, finish - start + 1 do
+    for i = 1, #list / 2 do
         local field = list[i * 2 - 1]
         local score = list[i * 2]
         if not field then

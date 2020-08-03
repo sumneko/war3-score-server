@@ -15,13 +15,15 @@ local speedReward = {
 }
 
 local function checkAward(time, date)
-    if date.hour == 17 and date.min == 35 and date.sec == 0 then
+    if date.hour == 23 and date.min == 50 and date.sec == 0 then
+        ngx.log(ngx.INFO, '进行排名结算！')
         local red = redis.get()
-        os.execute('md logs/reward')
-        local f = io.open(('logs/reward/%04d-%02d-%02d.log'):format(
+        os.execute('md logs\\reward')
+        local f = io.open(('logs\\reward\\%04d-%02d-%02d-%02d.log'):format(
             date.year,
             date.month,
-            date.day
+            date.day,
+            date.sec
         ), 'wb')
 
         -- 计算每个玩家在排行榜中的最高名次
@@ -46,9 +48,17 @@ local function checkAward(time, date)
         if f then
             f:write('=====玩家一览=====\n')
         end
-        for player, rank in pairs(maxRank) do
+        local sortedRank = {}
+        for player in pairs(maxRank) do
+            sortedRank[#sortedRank+1] = player
+        end
+        table.sort(sortedRank, function (a, b)
+            return maxRank[a] < maxRank[b]
+        end)
+        for _, player in pairs(sortedRank) do
+            local rank = maxRank[player]
             if f then
-                f:write(player, '\t', rank, '\n')
+                f:write(rank, '\t', player, '\t')
             end
             for level, data in ipairs(speedReward) do
                 if rank <= data[1] then
@@ -67,6 +77,5 @@ local function checkAward(time, date)
 end
 
 timer.onTick(function (time, date)
-    ngx.log(ngx.INFO, time)
     checkAward(time, date)
 end)
