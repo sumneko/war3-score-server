@@ -15,7 +15,9 @@ local speedReward = {
 }
 
 local function checkAward(time, date)
-    if date.hour == 23 and date.min == 50 and date.sec == 0 then
+    if  date.hour == 23
+    and date.min == 50
+    and date.sec == 0 then
         ngx.log(ngx.INFO, '进行排名结算！')
         local red = redis.get()
         os.execute('md logs\\reward')
@@ -76,6 +78,26 @@ local function checkAward(time, date)
     end
 end
 
+local function checkClear(time, date)
+    -- wday == 1 是周日
+    if  date.wday == 1
+    and date.hour == 23
+    and date.min == 50
+    and date.sec == 0 then
+        ngx.log(ngx.INFO, '清空排行榜！')
+        local red = redis.get()
+        red:del(KEY.GROUP_SCORE)
+        red:del(KEY.GROUP_CLASS)
+        red:del(KEY.GROUP_TIME)
+        red:del(KEY.GROUP_LEVEL)
+        red:del(KEY.PLAYER_SCORE)
+        red:del(KEY.PLAYER_CLASS)
+        red:del(KEY.PLAYER_TIME)
+        red:del(KEY.PLAYER_LEVEL)
+    end
+end
+
 timer.onTick(function (time, date)
     checkAward(time, date)
+    checkClear(time, date)
 end)
