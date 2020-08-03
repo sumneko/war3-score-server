@@ -7,8 +7,7 @@
         {
             "label": "🔥启动",
             "command": [
-                "luajit.exe",
-                "启动.lua",
+                "启动.bat",
             ]
         },
     ]
