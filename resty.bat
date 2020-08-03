@@ -27,7 +27,7 @@ sub split_sh_args ($);
 sub join_sh_args ($);
 sub resolve_includes ($$);
 
-our $VERSION = '0.23';
+our $VERSION = '0.25';
 
 # OpenResty's build system would patch the following line to initialize
 # the $nginx_path variable to point to the path of its own nginx binary
@@ -46,7 +46,7 @@ my @all_args = @ARGV;
 my (@http_confs, @http_includes, @main_confs, @main_includes, @shdicts, @ns, @src_a);
 
 my $errlog_level = "warn";
-my ($use_gdb, $use_valgrind, $use_rr, $version, $gdb_opts);
+my ($use_gdb, $use_valgrind, $use_rr, $version, $gdb_opts, $user_runner);
 my ($use_stap, $stap_opts);
 my ($conns_num, @inc_dirs, $jit_dumper, $valgrind_opts, $resolve_ipv6);
 my $lua_shared_dicts = '';
@@ -297,6 +297,28 @@ my $lua_shared_dicts = '';
 
             if ($arg eq '--resolve-ipv6') {
                 $resolve_ipv6 = 1;
+                next;
+            }
+
+            if ($arg =~ /^--user-runner=(.*)/) {
+                if (defined $user_runner) {
+                    die "ERROR: duplicate --odb options\n";
+                }
+
+                $user_runner = $1;
+                next;
+            }
+
+            if ($arg eq '--user-runner') {
+                if (defined $user_runner) {
+                    die "ERROR: duplicate --user-runner options\n";
+                }
+
+                $user_runner = shift @args;
+                if (!defined $user_runner) {
+                    die "option --user-runner takes an argument but ",
+                        "found none.\n";
+                }
                 next;
             }
 
@@ -614,7 +636,7 @@ if ($^O eq 'msys') {
 my $child_pid;
 
 END {
-    if (!$is_win32 && defined $prefix_dir) {
+    if (!$is_win32 && !defined($child_pid) && defined $prefix_dir) {
         my $saved_status = $?;
         system("rm -rf $prefix_dir") == 0
             or warn "failed to remove temp directory $prefix_dir: $!";
@@ -668,7 +690,7 @@ _EOC_
 
 my $file_lua = '';
 if (defined $luafile) {
-    if (!-f $luafile) {
+    if (!-e $luafile) {
         die "Lua input file $luafile not found.\n";
     }
 
@@ -750,6 +772,8 @@ $lua_package_path_config
 $http_conf_lines
     $http_include_directives
     init_by_lua_block {
+        ngx.config.is_console = true
+
         local stdout = io.stdout
         local ngx_null = ngx.null
         local maxn = table.maxn
@@ -925,6 +949,10 @@ if ($use_gdb) {
     }
 
     unshift @cmd, @new;
+
+} elsif (defined $user_runner) {
+    unshift @cmd, split_sh_args $user_runner;
+    #warn "cmd: @cmd";
 }
 
 for my $sig (qw/ INT TERM QUIT HUP USR1 USR2 WINCH PIPE /) {
@@ -939,7 +967,7 @@ if (!defined $pid) {
 
 if ($pid == 0) {  # child process
     #use Data::Dumper;
-    #warn Dumper \@cmd;
+    #warn "exec ", Dumper \@cmd;
     #warn "exec [@cmd]...";
     exec(@cmd)
         or die "ERROR: failed to run command \"@cmd\": $!\n";
@@ -1023,6 +1051,8 @@ Options:
 
     --stap-opts OPTS
                         Pass extra systemtap command line options.
+
+    --user-runner CMD   Use CMD as user runner for the underlying nginx process.
 
     -V                  Print version numbers and nginx configurations.
 
@@ -1165,6 +1195,10 @@ sub resolve_includes ($$) {
 
 sub forward_signal {
     my $signame = shift;
+
+    if ($signame eq 'HUP') {
+        $signame = 'QUIT';
+    }
 
     if ($child_pid) {
         #warn "killing $child_pid with $signame ...\n";

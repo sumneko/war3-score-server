@@ -47,7 +47,7 @@ commercial subscription.
     
     stream {
     
-        keyval_zone zone=one:32k state=one.keyval;
+        keyval_zone zone=one:32k state=/var/lib/nginx/state/one.keyval;
         keyval      $ssl_server_name $name zone=one;
     
         server {
@@ -125,6 +125,18 @@ L<API|ngx_http_api_module>.
 The optional C<state> parameter specifies a I<C<file>>
 that keeps the current state of the key-value database in the JSON format
 and makes it persistent across nginx restarts.
+
+
+
+
+
+Examples:
+
+    
+    keyval_zone zone=one:32k state=/var/lib/nginx/state/one.keyval; # path for Linux
+    keyval_zone zone=one:32k state=/var/db/nginx/state/one.keyval;  # path for FreeBSD
+
+
 
 
 

@@ -317,6 +317,43 @@ directive instead:
 
 
 
+=head2 auth_delay
+
+
+B<syntax:> auth_delay I<I<C<time>>>
+
+
+B<default:> I<0s>
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+B<context:> I<location>
+
+
+
+This directive appeared in version 1.17.10.
+
+
+
+
+
+Delays processing of unauthorized requests with 401 response code
+to prevent timing attacks when access is limited by
+L<password|ngx_http_auth_basic_module>, by the
+L<result of subrequest|ngx_http_auth_request_module>,
+or by L<JWT|ngx_http_auth_jwt_module>.
+
+
+
+
+
+
+
 =head2 chunked_transfer_encoding
 
 
@@ -1795,6 +1832,14 @@ The value “C<off>” tells nginx to never wait for
 more data and close the connection immediately.
 This behavior breaks the protocol and should not be used under normal
 circumstances.
+
+
+
+
+
+To control closing
+L<HTTPE<sol>2|ngx_http_v2_module> connections,
+the directive must be specified on the L</server> level (1.19.1).
 
 
 

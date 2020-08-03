@@ -610,6 +610,152 @@ the C<prime256v1> curve was used by default.
 
 
 
+=head2 ssl_ocsp
+
+
+B<syntax:> ssl_ocsp I<C<on> E<verbar>
+        C<off> E<verbar>
+        C<leaf>>
+
+
+B<default:> I<off>
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+
+This directive appeared in version 1.19.0.
+
+
+
+
+
+Enables OCSP validation of the client certificate chain.
+The C<leaf> parameter
+enables validation of the client certificate only.
+
+
+
+
+
+For the OCSP validation to work,
+the L</ssl_verify_client> directive should be set to
+C<on> or C<optional>.
+
+
+
+
+
+To resolve the OCSP responder hostname,
+the L<ngx_http_core_module> directive
+should also be specified.
+
+
+
+
+
+Example:
+
+    
+    ssl_verify_client on;
+    ssl_ocsp          on;
+    resolver          192.0.2.1;
+
+
+
+
+
+
+
+
+
+=head2 ssl_ocsp_cache
+
+
+B<syntax:> ssl_ocsp_cache I<
+    C<off> E<verbar>
+    [C<shared>:I<C<name>>:I<C<size>>]>
+
+
+B<default:> I<off>
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+
+This directive appeared in version 1.19.0.
+
+
+
+
+
+Sets C<name> and C<size> of the cache
+that stores client certificates status for OCSP validation.
+The cache is shared between all worker processes.
+A cache with the same name can be used in several virtual servers.
+
+
+
+
+
+The C<off> parameter prohibits the use of the cache.
+
+
+
+
+
+
+
+=head2 ssl_ocsp_responder
+
+
+B<syntax:> ssl_ocsp_responder I<I<C<url>>>
+
+
+
+B<context:> I<http>
+
+
+B<context:> I<server>
+
+
+
+This directive appeared in version 1.19.0.
+
+
+
+
+
+Overrides the URL of the OCSP responder specified in the
+“L<Authority
+Information Access|https://tools.ietf.org/html/rfc5280#section-4.2.2.1>” certificate extension
+for validation of client certificates.
+
+
+
+
+
+Only “C<http:E<sol>E<sol>>” OCSP responders are supported:
+
+    
+    ssl_ocsp_responder http://ocsp.example.com/;
+
+
+
+
+
+
+
+
+
 =head2 ssl_password_file
 
 

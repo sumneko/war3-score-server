@@ -43,6 +43,14 @@ directive values.
 
 
 
+
+Before version 1.19.1,
+the L<ngx_http_core_module> mechanism
+was not used to control closing HTTPE<sol>2 connections.
+
+
+
+
 =head1 Example Configuration
 
 

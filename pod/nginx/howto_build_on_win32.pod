@@ -108,7 +108,7 @@ sources into lib directory:
     cd objs/lib
     tar -xzf ../../pcre-8.44.tar.gz
     tar -xzf ../../zlib-1.2.11.tar.gz
-    tar -xzf ../../openssl-1.1.1d.tar.gz
+    tar -xzf ../../openssl-1.1.1g.tar.gz
 
 
 
@@ -136,7 +136,7 @@ Run configure script:
         --with-cc-opt=-DFD_SETSIZE=1024 \
         --with-pcre=objs/lib/pcre-8.44 \
         --with-zlib=objs/lib/zlib-1.2.11 \
-        --with-openssl=objs/lib/openssl-1.1.1d \
+        --with-openssl=objs/lib/openssl-1.1.1g \
         --with-openssl-opt=no-asm \
         --with-http_ssl_module
 

@@ -624,6 +624,7 @@ B<syntax:> scgi_cache_path I<
     C<keys_zone>=I<C<name>>:I<C<size>>
     [C<inactive>=I<C<time>>]
     [C<max_size>=I<C<size>>]
+    [C<min_free>=I<C<size>>]
     [C<manager_files>=I<C<number>>]
     [C<manager_sleep>=I<C<time>>]
     [C<manager_threshold>=I<C<time>>]
@@ -718,8 +719,12 @@ By default, C<inactive> is set to 10 minutes.
 
 
 The special “cache manager” process monitors the maximum cache size set
-by the C<max_size> parameter.
-When this size is exceeded, it removes the least recently used data.
+by the C<max_size> parameter,
+and the minimum amount of free space set
+by the C<min_free> (1.19.1) parameter
+on the file system with cache.
+When the size is exceeded or there is not enough free space,
+it removes the least recently used data.
 The data is removed in iterations configured by
 C<manager_files>,
 C<manager_threshold>, and

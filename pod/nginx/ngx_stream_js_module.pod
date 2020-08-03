@@ -19,7 +19,6 @@ a subset of the JavaScript language.
 
 
 
-This module is not built by default.
 Download and install instructions are available
 L<here|install>.
 
@@ -30,30 +29,29 @@ L<here|install>.
 
 
 
+The example works since
+L<0.4.0|changes>.
 
     
-    load_module modules/ngx_stream_js_module.so;
-    ...
-    
     stream {
-        js_include stream.js;
+        js_import stream.js;
     
-        js_set $bar bar;
-        js_set $req_line req_line;
+        js_set $bar stream.bar;
+        js_set $req_line stream.req_line;
     
         server {
             listen 12345;
     
-            js_preread preread;
+            js_preread stream.preread;
             return     $req_line;
         }
     
         server {
             listen 12346;
     
-            js_access  access;
+            js_access  stream.access;
             proxy_pass 127.0.0.1:8000;
-            js_filter  header_inject;
+            js_filter  stream.header_inject;
         }
     }
     
@@ -125,6 +123,8 @@ The F<stream.js> file:
     
         s.allow();
     }
+    
+    export default {bar, preread, req_line, access};
 
 
 
@@ -136,7 +136,7 @@ The F<stream.js> file:
 =head2 js_access
 
 
-B<syntax:> js_access I<I<C<function>>>
+B<syntax:> js_access I<I<C<function>> E<verbar> I<C<module.function>>>
 
 
 
@@ -151,6 +151,8 @@ B<context:> I<server>
 
 Sets an njs function which will be called at the
 L<access|stream_processing> phase.
+Since L<0.4.0|changes>,
+a module function can be referenced.
 
 
 
@@ -161,7 +163,7 @@ L<access|stream_processing> phase.
 =head2 js_filter
 
 
-B<syntax:> js_filter I<I<C<function>>>
+B<syntax:> js_filter I<I<C<function>> E<verbar> I<C<module.function>>>
 
 
 
@@ -175,6 +177,53 @@ B<context:> I<server>
 
 
 Sets a data filter.
+Since L<0.4.0|changes>,
+a module function can be referenced.
+
+
+
+
+
+
+
+=head2 js_import
+
+
+B<syntax:> js_import I<I<C<module.js>> E<verbar>
+I<C<export_name from module.js>>>
+
+
+
+B<context:> I<stream>
+
+
+
+This directive appeared in version 0.4.0.
+
+
+
+
+
+Imports a module that implements location and variable handlers in njs.
+The C<export_name> is used as a namespace
+to access module functions.
+If the C<export_name> is not specified,
+the module name will be used as a namespace.
+
+    
+    js_import stream.js;
+
+
+Here, the module name C<stream> is used as a namespace
+while accessing exports.
+If the imported module contains C<foo()>,
+C<stream.foo> is used to refer to it.
+
+
+
+
+
+Several C<js_import> directives can be specified.
 
 
 
@@ -195,7 +244,31 @@ B<context:> I<stream>
 
 
 
-Specifies a file that implements server and variable handlers in njs.
+Specifies a file that implements server and variable handlers in njs:
+
+    
+    nginx.conf:
+    js_include stream.js;
+    js_set     $js_addr address;
+    server {
+        listen 127.0.0.1:12345;
+        return $js_addr;
+    }
+    
+    stream.js:
+    function address(s) {
+        return s.remoteAddress;
+    }
+
+
+
+
+
+
+
+The directive is deprecated since
+L<0.4.0|changes>,
+the L</js_import> directive should be used instead.
 
 
 
@@ -232,7 +305,7 @@ Sets an additional path for njs modules.
 =head2 js_preread
 
 
-B<syntax:> js_preread I<I<C<function>>>
+B<syntax:> js_preread I<I<C<function>> E<verbar> I<C<module.function>>>
 
 
 
@@ -247,6 +320,8 @@ B<context:> I<server>
 
 Sets an njs function which will be called at the
 L<preread|stream_processing> phase.
+Since L<0.4.0|changes>,
+a module function can be referenced.
 
 
 
@@ -258,7 +333,8 @@ L<preread|stream_processing> phase.
 
 
 B<syntax:> js_set I<
-I<C<$variable>> I<C<function>>>
+I<C<$variable>> I<C<function>> E<verbar>
+I<C<module.function>>>
 
 
 
@@ -269,6 +345,8 @@ B<context:> I<stream>
 
 
 Sets an njs function for the specified variable.
+Since L<0.4.0|changes>,
+a module function can be referenced.
 
 
 

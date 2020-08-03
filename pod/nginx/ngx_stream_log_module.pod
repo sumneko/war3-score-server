@@ -250,6 +250,36 @@ The C<none> parameter (1.13.10) disables escaping.
 
 
 
+For C<default> escaping,
+characters “C<">”, “C<\>”,
+and other characters with values less than 32 or above 126
+are escaped as “C<\xXX>”.
+If the variable value is not found,
+a hyphen (“C<->”) will be logged.
+
+
+
+
+
+For C<json> escaping,
+all characters not allowed
+in JSON L<strings|https://tools.ietf.org/html/rfc8259#section-7>
+will be escaped:
+characters “C<">” and
+“C<\>” are escaped as
+“C<\">” and “C<\\>”,
+characters with values less than 32 are escaped as
+“C<\n>”,
+“C<\r>”,
+“C<\t>”,
+“C<\b>”,
+“C<\f>”, or
+“C<\u00XX>”.
+
+
+
+
+
 
 
 =head2 open_log_file_cache
