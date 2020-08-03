@@ -3,9 +3,12 @@ local code     = require 'script.code'
 local redis    = require 'script.redis'
 local speed    = require 'script.jzslm.speed'
 local money    = require 'script.jzslm.money'
+local item     = require 'script.jzslm.item'
+local camp     = require 'script.jzslm.camp'
 
 local data, err = messager.recive()
 if not data then
+    ngx.log(ngx.WARN, err)
     messager.response {
         result  = false,
         error   = code.ERROR_PROTO_ERROR,
@@ -25,6 +28,10 @@ local function call()
         return redis.call(money.get, data.value)
     elseif data.type == 'costMoney' then
         return redis.call(money.cost, data.value)
+    elseif data.type == 'getCamp' then
+        return redis.call(camp.get, data.value)
+    elseif data.type == 'setCamp' then
+        return redis.call(camp.set, data.value)
     end
     error('Unknown proto:' .. tostring(data.type))
 end

@@ -7,5 +7,7 @@ return {
     PLAYER_SCORE = 'jzslm:speed.player.score',
     GROUP_LEVEL  = 'jzslm:speed.group.level',
     PLAYER_LEVEL = 'jzslm:speed.player.level',
-    MONEY        = 'jzslm:money.'
+    MONEY        = 'jzslm:money.',
+    CAMP         = 'jzslm:camp',
+    ITEM         = 'jzslm:item.',
 }
