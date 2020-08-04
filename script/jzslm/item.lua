@@ -54,6 +54,39 @@ function m.get(rds, data)
     return tonumber(rds:hget(KEY.ITEM .. name, player))
 end
 
+function m.use(rds, data)
+    local player = data.player
+    local name   = data.name
+    local item   = shop[name]
+    if not item then
+        return {
+            result = false,
+            error  = 1,
+        }
+    end
+    if not item.stack then
+        return {
+            result = false,
+            error  = 3,
+        }
+    end
+    local keyItem = KEY.ITEM .. name
+    local count = rds:hincrby(keyItem, player, -1)
+    if count < 0 then
+        rds:hincrby(keyItem, player, 1)
+        return {
+            result = false,
+            error  = 2,
+            count  = count + 1,
+        }
+    end
+    return {
+        result = true,
+        error  = 0,
+        count  = count,
+    }
+end
+
 function m.getAllInfo(rds, data)
     return shop
 end
