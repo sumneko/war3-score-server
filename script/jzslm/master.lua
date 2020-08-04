@@ -3,6 +3,7 @@ local redis = require 'script.redis'
 local util  = require 'script.utility'
 local KEY   = require 'script.jzslm.key'
 local money = require 'script.jzslm.money'
+local item  = require 'script.jzslm.item'
 local log   = require 'script.log'
 
 local speedReward = {
@@ -18,7 +19,7 @@ local speedReward = {
 local function checkAwardBySpeed(time, date)
     if  date.hour == 23
     and date.min == 50
-    and date.sec == 0 then
+    and date.sec == 00 then
         ngx.log(ngx.INFO, '进行排名结算！')
         local red = redis.get()
         local f = log(('logs\\reward\\%04d-%02d-%02d-%02d.log'):format(
@@ -53,11 +54,20 @@ local function checkAwardBySpeed(time, date)
         end)
         for _, player in pairs(sortedRank) do
             local rank = maxRank[player]
-            f:write(rank, '\t', player, '\t')
+            f:write(rank, '\t', player, '\n')
             for level, data in ipairs(speedReward) do
                 if rank <= data[1] then
-                    f:write('\t', level, '\n', data[2], '\n')
-                    money._add(red, player, '声望', data[2])
+                    local reward = data[2]
+                    local hasFlag = item._get(red, player, '联盟战旗') > 0
+                                or  item._get(red, player, '部落战旗') > 0
+                    if hasFlag then
+                        reward = reward * 1.1
+                    end
+                    f:write('\t档位：', level)
+                    f:write('\t奖励：', reward)
+                    f:write('\t有战旗：', tostring(hasFlag))
+                    f:write('\n')
+                    money._add(red, player, '声望', reward)
                     break
                 end
             end

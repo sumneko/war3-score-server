@@ -48,10 +48,14 @@ function m.buy(rds, data)
     }
 end
 
+function m._get(rds, player, name)
+    return tonumber(rds:hget(KEY.ITEM .. name, player)) or 0
+end
+
 function m.get(rds, data)
     local player = data.player
     local name   = data.name
-    return tonumber(rds:hget(KEY.ITEM .. name, player))
+    return m._get(rds, player, name)
 end
 
 function m.use(rds, data)
