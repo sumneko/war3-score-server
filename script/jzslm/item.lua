@@ -4,6 +4,7 @@ local shop = require 'script.jzslm.shop'
 local m = {}
 
 function m.buyItem()
+    local item
 end
 
 function m.getItem(rds, data)
