@@ -3,6 +3,7 @@ local redis = require 'script.redis'
 local util  = require 'script.utility'
 local KEY   = require 'script.jzslm.key'
 local money = require 'script.jzslm.money'
+local log   = require 'script.log'
 
 local speedReward = {
     {  1,       100},
@@ -20,24 +21,19 @@ local function checkAwardBySpeed(time, date)
     and date.sec == 0 then
         ngx.log(ngx.INFO, '进行排名结算！')
         local red = redis.get()
-        os.execute('md logs\\reward')
-        local f = io.open(('logs\\reward\\%04d-%02d-%02d-%02d.log'):format(
+        local f = log(('logs\\reward\\%04d-%02d-%02d-%02d.log'):format(
             date.year,
             date.month,
             date.day,
             date.sec
-        ), 'wb')
+        ))
 
         -- 计算每个玩家在排行榜中的最高名次
-        if f then
-            f:write('=====排行榜一览=====\n')
-        end
+        f:write('=====排行榜一览=====\n')
         local maxRank = {}
         local uids = util.zrevrange(red, KEY.GROUP_SCORE, 1, -1)
         for rank, uid in ipairs(uids) do
-            if f then
-                f:write(rank, '\t', uid, '\n')
-            end
+            f:write(rank, '\t', uid, '\n')
             local players = util.unpackList(uid)
             for _, player in ipairs(players) do
                 if not maxRank[player] or maxRank[player] > rank then
@@ -47,9 +43,7 @@ local function checkAwardBySpeed(time, date)
         end
 
         -- 根据每个玩家的最高名次来发送奖励
-        if f then
-            f:write('=====玩家一览=====\n')
-        end
+        f:write('=====玩家一览=====\n')
         local sortedRank = {}
         for player in pairs(maxRank) do
             sortedRank[#sortedRank+1] = player
@@ -59,22 +53,16 @@ local function checkAwardBySpeed(time, date)
         end)
         for _, player in pairs(sortedRank) do
             local rank = maxRank[player]
-            if f then
-                f:write(rank, '\t', player, '\t')
-            end
+            f:write(rank, '\t', player, '\t')
             for level, data in ipairs(speedReward) do
                 if rank <= data[1] then
-                    if f then
-                        f:write('\t', level, '\n', data[2], '\n')
-                    end
+                    f:write('\t', level, '\n', data[2], '\n')
                     money._add(red, player, '声望', data[2])
                     break
                 end
             end
         end
-        if f then
-            f:close()
-        end
+        f:close()
     end
 end
 
@@ -84,21 +72,16 @@ local function checkAwardByItem(time, date)
     and date.sec == 05 then
         ngx.log(ngx.INFO, '进行战旗奖励结算！')
         local red = redis.get()
-        os.execute('md logs\\reward-item')
-        local f = io.open(('logs\\reward-item\\%04d-%02d-%02d-%02d.log'):format(
+        local f = log(('logs\\reward-item\\%04d-%02d-%02d-%02d.log'):format(
             date.year,
             date.month,
             date.day,
             date.sec
-        ), 'wb')
+        ))
 
-        if f then
-            f:write('=====战旗一览=====\n')
-        end
+        f:write('=====战旗一览=====\n')
         for _, name in ipairs {'联盟战旗', '部落战旗'} do
-            if f then
-                f:write('-----', name, '-----\n')
-            end
+            f:write('-----', name, '-----\n')
             local key = KEY.ITEM .. name
             local values = util.hgetall(red, key)
             for player, value in pairs(values) do
@@ -111,9 +94,7 @@ local function checkAwardByItem(time, date)
                 end
             end
         end
-        if f then
-            f:close()
-        end
+        f:close()
     end
 end
 
