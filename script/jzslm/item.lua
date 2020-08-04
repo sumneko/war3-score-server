@@ -21,27 +21,30 @@ function m.buy(rds, data)
     local count = tonumber(rds:hget(keyItem, player)) or 0
     if count > 0 and not item.stack then
         return {
-            result = false,
-            error  = 2,
-            money  = money._get(rds, data.currency),
-            count  = count,
+            result   = false,
+            error    = 2,
+            money    = money._get(rds, data.currency),
+            currency = data.currency,
+            count    = count,
         }
     end
     local suc, _, new = money._cost(rds, player, data.currency, data.price)
     if not suc then
         return {
-            result = false,
-            error  = 1,
-            money  = new,
-            count  = count,
+            result   = false,
+            error    = 1,
+            money    = new,
+            currency = data.currency,
+            count    = count,
         }
     end
     count = rds:hincrbyfloat(keyItem, player, 1)
     return {
-        result = true,
-        error  = 0,
-        money  = new,
-        count  = count,
+        result   = true,
+        error    = 0,
+        money    = new,
+        currency = data.currency,
+        count    = count,
     }
 end
 
