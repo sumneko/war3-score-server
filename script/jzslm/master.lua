@@ -14,7 +14,7 @@ local speedReward = {
     {math.huge,  20},
 }
 
-local function checkAward(time, date)
+local function checkAwardBySpeed(time, date)
     if  date.hour == 23
     and date.min == 50
     and date.sec == 0 then
@@ -78,12 +78,51 @@ local function checkAward(time, date)
     end
 end
 
+local function checkAwardByItem(time, date)
+    if  date.hour == 23
+    and date.min == 50
+    and date.sec == 05 then
+        ngx.log(ngx.INFO, '进行战旗奖励结算！')
+        local red = redis.get()
+        os.execute('md logs\\reward-item')
+        local f = io.open(('logs\\reward-item\\%04d-%02d-%02d-%02d.log'):format(
+            date.year,
+            date.month,
+            date.day,
+            date.sec
+        ), 'wb')
+
+        if f then
+            f:write('=====战旗一览=====\n')
+        end
+        for _, name in ipairs {'联盟战旗', '部落战旗'} do
+            if f then
+                f:write('-----', name, '-----\n')
+            end
+            local key = KEY.ITEM .. name
+            local values = util.hgetall(red, key)
+            for player, value in pairs(values) do
+                local count = tonumber(value) or 0
+                if count > 0 then
+                    if f then
+                        f:write(player, '\n')
+                    end
+                    money._add(red, player, '声望', 5)
+                end
+            end
+        end
+        if f then
+            f:close()
+        end
+    end
+end
+
 local function checkClear(time, date)
     -- wday == 1 是周日
     if  date.wday == 1
     and date.hour == 23
     and date.min == 50
-    and date.sec == 0 then
+    and date.sec == 10 then
         ngx.log(ngx.INFO, '清空排行榜！')
         local red = redis.get()
         red:del(KEY.GROUP_SCORE)
@@ -98,6 +137,7 @@ local function checkClear(time, date)
 end
 
 timer.onTick(function (time, date)
-    checkAward(time, date)
+    checkAwardBySpeed(time, date)
+    checkAwardByItem(time, date)
     checkClear(time, date)
 end)

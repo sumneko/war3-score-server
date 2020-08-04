@@ -52,7 +52,7 @@ function m.zrevrangebyscore(redis, key, max, min)
     local list = redis:zrevrangebyscore(key, max, min, 'WITHSCORES')
     local fields = {}
     local scores = {}
-    for i = 1, min - max + 1 do
+    for i = 1, #list / 2 do
         local field = list[i * 2 - 1]
         local score = list[i * 2]
         if not field then
@@ -62,6 +62,20 @@ function m.zrevrangebyscore(redis, key, max, min)
         scores[i] = score
     end
     return fields, scores
+end
+
+function m.hgetall(redis, key)
+    local list = redis:hgetall(key)
+    local t = {}
+    for i = 1, #list / 2 do
+        local field = list[i * 2 - 1]
+        local value = list[i * 2]
+        if not field then
+            break
+        end
+        t[field] = value
+    end
+    return t
 end
 
 function m.unpackList(buf)

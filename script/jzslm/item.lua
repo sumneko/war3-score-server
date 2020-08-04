@@ -14,7 +14,7 @@ function m.buy(rds, data)
         }
     end
     local keyItem = KEY.ITEM .. data.name
-    if not data.price or not data.currency then
+    if not item.price or not item.currency then
         error('物品配置错误：' .. data.name)
     end
     -- 不可堆叠的物品只能买一次
@@ -23,18 +23,18 @@ function m.buy(rds, data)
         return {
             result   = false,
             error    = 2,
-            money    = money._get(rds, data.currency),
-            currency = data.currency,
+            money    = money._get(rds, item.currency),
+            currency = item.currency,
             count    = count,
         }
     end
-    local suc, _, new = money._cost(rds, player, data.currency, data.price)
+    local suc, _, new = money._cost(rds, player, item.currency, item.price)
     if not suc then
         return {
             result   = false,
             error    = 1,
             money    = new,
-            currency = data.currency,
+            currency = item.currency,
             count    = count,
         }
     end
@@ -43,7 +43,7 @@ function m.buy(rds, data)
         result   = true,
         error    = 0,
         money    = new,
-        currency = data.currency,
+        currency = item.currency,
         count    = count,
     }
 end
