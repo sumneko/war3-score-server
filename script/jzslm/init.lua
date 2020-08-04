@@ -36,8 +36,8 @@ local function call()
         return redis.call(item.buy, data.value)
     elseif data.type == 'getItem' then
         return redis.call(item.get, data.value)
-    elseif data.type == 'getItemInfo' then
-        return redis.call(item.getInfo, data.value)
+    elseif data.type == 'getAllItemInfo' then
+        return redis.call(item.getAllInfo, data.value)
     end
     error('Unknown proto:' .. tostring(data.type))
 end

@@ -54,8 +54,8 @@ function m.get(rds, data)
     return tonumber(rds:hget(KEY.ITEM .. name, player))
 end
 
-function m.getInfo(rds, data)
-    return shop[data.name]
+function m.getAllInfo(rds, data)
+    return shop
 end
 
 return m
