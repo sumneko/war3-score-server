@@ -67,7 +67,7 @@ local function checkAward(time, date)
                     if f then
                         f:write('\t', level, '\n', data[2], '\n')
                     end
-                    money.add(red, player, '声望', data[2])
+                    money._add(red, player, '声望', data[2])
                     break
                 end
             end
