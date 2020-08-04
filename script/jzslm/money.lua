@@ -3,7 +3,7 @@ local KEY   = require 'script.jzslm.key'
 local m = {}
 
 function m._add(red, player, name, value)
-    return tonumber(red:hincrbyfloat(KEY.MONEY .. name, player, value)) or 0
+    return tonumber((red:hincrbyfloat(KEY.MONEY .. name, player, value))) or 0
 end
 
 function m._get(red, player, name)

@@ -4,6 +4,7 @@ local util  = require 'script.utility'
 local KEY   = require 'script.jzslm.key'
 local money = require 'script.jzslm.money'
 local item  = require 'script.jzslm.item'
+local camp  = require 'script.jzslm.camp'
 local log   = require 'script.log'
 
 local speedReward = {
@@ -22,11 +23,10 @@ local function checkAwardBySpeed(time, date)
     and date.sec == 00 then
         ngx.log(ngx.INFO, '进行排名结算！')
         local red = redis.get()
-        local f = log(('logs\\reward\\%04d-%02d-%02d-%02d.log'):format(
+        local f = log(('logs\\reward\\%04d-%02d-%02d.log'):format(
             date.year,
             date.month,
-            date.day,
-            date.sec
+            date.day
         ))
 
         -- 计算每个玩家在排行榜中的最高名次
@@ -57,20 +57,33 @@ local function checkAwardBySpeed(time, date)
             f:write(rank, '\t', player, '\n')
             for level, data in ipairs(speedReward) do
                 if rank <= data[1] then
-                    local reward = data[2]
+                    local selfReward = data[2]
+                    local campReward = data[2]
+                    local campName   = camp._get(red, player)
                     local hasFlag = item._get(red, player, '联盟战旗') > 0
                                 or  item._get(red, player, '部落战旗') > 0
                     if hasFlag then
-                        reward = reward * 1.1
+                        campReward = campReward * 1.1
                     end
-                    f:write('\t档位：', level)
-                    f:write('\t奖励：', reward)
-                    f:write('\t有战旗：', tostring(hasFlag))
+                    if campName then
+                        camp._addMoney(red, campName, '声望', campReward)
+                    end
+                    f:write('\t档位：',    level)
+                    f:write('\t个人奖励：', selfReward)
+                    f:write('\t阵营奖励：', campReward)
+                    f:write('\t有战旗：',   tostring(hasFlag))
+                    f:write('\t所属阵营：', tostring(campName))
                     f:write('\n')
-                    money._add(red, player, '声望', reward)
+                    money._add(red, player, '声望', selfReward)
                     break
                 end
             end
+        end
+
+        f:write('=====阵营声望=====\n')
+        for _, campName in ipairs {'联盟', '部落'} do
+            local value = camp._getMoney(red, campName, '声望')
+            f:write(campName, '\t', value, '\n')
         end
         f:close()
     end
@@ -82,11 +95,10 @@ local function checkAwardByItem(time, date)
     and date.sec == 05 then
         ngx.log(ngx.INFO, '进行战旗奖励结算！')
         local red = redis.get()
-        local f = log(('logs\\reward-item\\%04d-%02d-%02d-%02d.log'):format(
+        local f = log(('logs\\reward-item\\%04d-%02d-%02d.log'):format(
             date.year,
             date.month,
-            date.day,
-            date.sec
+            date.day
         ))
 
         f:write('=====战旗一览=====\n')
@@ -97,9 +109,7 @@ local function checkAwardByItem(time, date)
             for player, value in pairs(values) do
                 local count = tonumber(value) or 0
                 if count > 0 then
-                    if f then
-                        f:write(player, '\n')
-                    end
+                    f:write(player, '\n')
                     money._add(red, player, '声望', 5)
                 end
             end
@@ -113,7 +123,7 @@ local function checkClear(time, date)
     if  date.wday == 1
     and date.hour == 23
     and date.min == 50
-    and date.sec == 10 then
+    and date.sec == 15 then
         ngx.log(ngx.INFO, '清空排行榜！')
         local red = redis.get()
         red:del(KEY.GROUP_SCORE)

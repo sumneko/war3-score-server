@@ -30,8 +30,8 @@ local function checkGroupRecord(redis, data, newScore)
             result = false,
         }
     else
-        local oldTime  = tonumber(redis:hget(KEY.GROUP_TIME,  uid))
-        local oldLevel = tonumber(redis:hget(KEY.GROUP_LEVEL, uid))
+        local oldTime  = tonumber((redis:hget(KEY.GROUP_TIME,  uid)))
+        local oldLevel = tonumber((redis:hget(KEY.GROUP_LEVEL, uid)))
         redis:zadd(KEY.GROUP_SCORE, newScore, uid)
         redis:hset(KEY.GROUP_CLASS, uid,      class)
         redis:hset(KEY.GROUP_TIME,  uid,      data.time)

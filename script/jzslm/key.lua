@@ -10,4 +10,5 @@ return {
     MONEY        = 'jzslm:money.',
     CAMP         = 'jzslm:camp',
     ITEM         = 'jzslm:item.',
+    CAMP_MONEY   = 'jzslm:camp.money.',
 }

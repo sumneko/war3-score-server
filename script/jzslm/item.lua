@@ -18,7 +18,7 @@ function m.buy(rds, data)
         error('物品配置错误：' .. data.name)
     end
     -- 不可堆叠的物品只能买一次
-    local count = tonumber(rds:hget(keyItem, player)) or 0
+    local count = tonumber((rds:hget(keyItem, player))) or 0
     if count > 0 and not item.stack then
         return {
             result   = false,
@@ -49,7 +49,7 @@ function m.buy(rds, data)
 end
 
 function m._get(rds, player, name)
-    return tonumber(rds:hget(KEY.ITEM .. name, player)) or 0
+    return tonumber((rds:hget(KEY.ITEM .. name, player))) or 0
 end
 
 function m.get(rds, data)
