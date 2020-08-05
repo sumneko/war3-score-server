@@ -31,7 +31,7 @@ return {
         price    = 500,
         currency = '声望',
     },
-    ['乌鸦之神'] = {
+    ['烈焰之爪'] = {
         price    = 700,
         currency = '声望',
     },

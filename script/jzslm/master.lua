@@ -172,8 +172,8 @@ local function test(time, date)
         return
     end
     MARK = true
-    awardBySpeed(time, date)
-    awardByCamp(time, date)
+    local red = redis.get()
+    money._add(red, 'WorldEdit', '声望', 10000)
 end
 
 timer.onTick(function (time, date)
