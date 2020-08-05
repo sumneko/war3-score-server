@@ -38,7 +38,7 @@ function m.buy(rds, data)
             count    = count,
         }
     end
-    count = rds:hincrbyfloat(keyItem, player, 1)
+    count = rds:hincrby(keyItem, player, 1)
     return {
         result   = true,
         error    = 0,
