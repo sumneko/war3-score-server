@@ -191,7 +191,9 @@ timer.onTick(function (time, date)
         awardByItem(time, date)
     end
 
-    if  date.hour == 23
+    -- wday == 1 是周日
+    if  date.wday == 1
+    and date.hour == 23
     and date.min == 50
     and date.sec == 10 then
         awardByCamp(time, date)
