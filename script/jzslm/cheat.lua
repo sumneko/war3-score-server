@@ -38,7 +38,7 @@ end
 
 function m.clear()
     local rds = redis.get()
-    local f = log('logs\\cheat\\clear-1.log')
+    local f = log(('logs\\cheat\\clear-%d.log'):format(os.time()))
     local cheats = {}
     local uids = util.zrevrange(rds, KEY.GROUP_SCORE, 1, -1)
     f:write('=====旧的排行榜一览=====\n')
