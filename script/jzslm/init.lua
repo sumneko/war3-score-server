@@ -5,6 +5,7 @@ local speed    = require 'script.jzslm.speed'
 local money    = require 'script.jzslm.money'
 local item     = require 'script.jzslm.item'
 local camp     = require 'script.jzslm.camp'
+local hotfix   = require 'script.jzslm.hotfix'
 
 local data, err = messager.recive()
 if not data then
@@ -42,6 +43,8 @@ local function call()
         return redis.call(item.getAllInfo, data.value)
     elseif data.type == 'useItem' then
         return redis.call(item.use, data.value)
+    elseif data.type == 'hotfix' then
+        return redis.call(hotfix, data.value)
     end
     error('Unknown proto:' .. tostring(data.type))
 end
