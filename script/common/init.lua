@@ -16,7 +16,7 @@ end
 
 local function call()
     if data.type == 'cheat' then
-        redis.call(cheat.report, data.value)
+        return redis.call(cheat.report, data.value)
     end
     error('Unknown proto:' .. tostring(data.type))
 end

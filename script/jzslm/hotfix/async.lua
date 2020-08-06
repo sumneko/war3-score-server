@@ -29,7 +29,7 @@ ac.loop(10, function ()
         return
     end
     -- 检查无敌
-    if not u:has '无敌' and jass.GetUnitAbilityLevel(u._handle, ac.id['Avul']) > 0 then
+    if not u:hasRestriction '无敌' and jass.GetUnitAbilityLevel(u._handle, ac.id['Avul']) > 0 then
         reportCheat()
         return
     end
