@@ -1,0 +1,3 @@
+return {
+    CHEAT        = 'cheat'
+}

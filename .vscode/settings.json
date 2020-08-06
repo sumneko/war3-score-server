@@ -3,6 +3,7 @@
     "Lua.diagnostics.globals": [
         "ngx",
         "ndk",
-        "newproxy"
+        "newproxy",
+        "ac"
     ]
 }
