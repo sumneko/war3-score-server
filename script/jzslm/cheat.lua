@@ -33,11 +33,11 @@ function m.isBlack(names)
     local rds = redis.get()
     for _, name in ipairs(names) do
         local c = tonumber((rds:hget(KEY.CHEAT, name))) or 0
-        if c < CHEAT_MAX then
-            return false
+        if c >= CHEAT_MAX then
+            return true
         end
     end
-    return true
+    return false
 end
 
 function m.clear()
