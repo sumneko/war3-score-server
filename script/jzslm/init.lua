@@ -33,6 +33,8 @@ local function call()
         return redis.call(camp.get, data.value)
     elseif data.type == 'setCamp' then
         return redis.call(camp.set, data.value)
+    elseif data.type == 'getCampMoney' then
+        return redis.call(camp.getMoney, data.value)
     elseif data.type == 'buyItem' then
         return redis.call(item.buy, data.value)
     elseif data.type == 'getItem' then

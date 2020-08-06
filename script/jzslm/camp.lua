@@ -46,4 +46,8 @@ function m._getMoney(rds, camp, name)
     return tonumber((rds:hget(KEY.CAMP_MONEY .. name, camp))) or 0
 end
 
+function m.getMoney(rds, data)
+    return m._getMoney(rds, data['camp'], data['name'])
+end
+
 return m
