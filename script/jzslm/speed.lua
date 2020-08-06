@@ -1,5 +1,6 @@
 local util = require 'script.utility'
 local KEY  = require 'script.jzslm.key'
+local CHEAT_TIME = 12 * 60
 
 local m = {}
 
@@ -17,11 +18,30 @@ local function getGroupUIDandClass(players)
     for _, name in ipairs(names) do
         class[#class+1] = classMap[name]
     end
-    return table.concat(names, ','), table.concat(class, ',')
+    return table.concat(names, ','), table.concat(class, ','), names
+end
+
+function m.markCheat(rds, names)
+    for _, name in ipairs(names) do
+        if #names == 1 then
+            rds:hincrby(KEY.CHEAT, name, 10)
+        else
+            rds:hincrby(KEY.CHEAT, name, 1)
+        end
+    end
 end
 
 local function checkGroupRecord(redis, data, newScore)
-    local uid, class = getGroupUIDandClass(data.players)
+    local uid, class, names = getGroupUIDandClass(data.players)
+    -- 检查作弊
+    if data.time <= CHEAT_TIME then
+        m.markCheat(redis, names)
+        return {
+            name   = uid,
+            class  = class,
+            result = false,
+        }
+    end
     local oldScore   = tonumber(redis:zscore(KEY.GROUP_SCORE, uid))
     if oldScore and oldScore >= newScore then
         return {
@@ -145,6 +165,11 @@ function m.getRank(redis, data)
         local names   = util.unpackList(uid)
         local class   = util.unpackList(qClass)
         local players = {}
+        -- 过滤作弊
+        if time <= CHEAT_TIME then
+            names = {'|cffff1111该用户已被封禁，稍后将被移出排行榜，欢迎举报！|r'}
+            class = {'无'}
+        end
         for x, name in ipairs(names) do
             players[x] = {
                 name  = name,

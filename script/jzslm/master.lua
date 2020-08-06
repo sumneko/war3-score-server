@@ -176,8 +176,13 @@ local function test(time, date)
     money._add(red, 'WorldEdit', '声望', 10000)
 end
 
+local function checkCheat()
+    local f = log('logs\\cheat.log')
+end
+
 timer.onTick(function (time, date)
     --test(time, date)
+    --checkCheat()
 
     if  date.hour == 23
     and date.min == 50

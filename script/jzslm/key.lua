@@ -11,4 +11,5 @@ return {
     CAMP         = 'jzslm:camp',
     ITEM         = 'jzslm:item.',
     CAMP_MONEY   = 'jzslm:camp.money.',
+    CHEAT        = 'cheat'
 }
