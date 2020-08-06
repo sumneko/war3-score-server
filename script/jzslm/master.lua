@@ -173,9 +173,12 @@ local function test(time, date)
         return
     end
     MARK = true
-    local red = redis.get()
+    local rds = redis.get()
     --money._add(red, 'WorldEdit', '声望', 10000)
-    cheat.clear()
+    --cheat.clear()
+    rds:hincrby(KEY.CHEAT, '轻轨⑥号线', -10)
+    rds:hincrby(KEY.CHEAT, 'Olgaga', -10)
+    rds:hincrby(KEY.CHEAT, '史新月', -10)
 end
 
 timer.onTick(function (time, date)
