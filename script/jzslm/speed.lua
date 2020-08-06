@@ -1,6 +1,6 @@
-local util = require 'script.utility'
-local KEY  = require 'script.jzslm.key'
-local CHEAT_TIME = 12 * 60
+local util  = require 'script.utility'
+local KEY   = require 'script.jzslm.key'
+local cheat = require 'script.jzslm.cheat'
 
 local m = {}
 
@@ -21,23 +21,11 @@ local function getGroupUIDandClass(players)
     return table.concat(names, ','), table.concat(class, ',')
 end
 
-function m.markCheat(rds, names)
-    for _, name in ipairs(names) do
-        if #names == 1 then
-            ngx.log(ngx.WARN, '作弊：', name, ' + 10')
-            rds:hincrby(KEY.CHEAT, name, 10)
-        else
-            ngx.log(ngx.WARN, '作弊：', name, ' + 1')
-            rds:hincrby(KEY.CHEAT, name, 1)
-        end
-    end
-end
-
 local function checkGroupRecord(redis, data, newScore)
-    local uid, class, names = getGroupUIDandClass(data.players)
+    local uid, class = getGroupUIDandClass(data.players)
     -- 检查作弊
-    if data.time <= CHEAT_TIME then
-        m.markCheat(redis, util.unpackList(uid))
+    if cheat.checkTime(data.time) then
+        cheat.mark(util.unpackList(uid))
         return {
             name   = uid,
             class  = class,
@@ -168,7 +156,7 @@ function m.getRank(redis, data)
         local class   = util.unpackList(qClass)
         local players = {}
         -- 过滤作弊
-        if time <= CHEAT_TIME then
+        if cheat.checkTime(time) then
             names = {'|cffff1111该用户已被封禁，稍后将被移出排行榜，欢迎举报！|r'}
             class = {'无'}
         end
