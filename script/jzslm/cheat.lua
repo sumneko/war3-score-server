@@ -4,11 +4,15 @@ local util  = require 'script.utility'
 local log   = require 'script.log'
 
 local CHEAT_TIME = 14 * 60
+local CHEAT_LEVEL = 7
 local CHEAT_MAX  = 10
 
 local m = {}
 
-function m.checkTime(time)
+function m.checkTime(level, time)
+    if level < CHEAT_LEVEL then
+        return false
+    end
     return time <= CHEAT_TIME
 end
 
@@ -50,10 +54,10 @@ function m.clear()
             qClass = ''
         end
         local names   = util.unpackList(uid)
-        if m.checkTime(time) then
+        if m.checkTime(level, time) then
             m.mark(names)
         end
-        if m.isBlack(names) or m.checkTime(time) then
+        if m.isBlack(names) or m.checkTime(level, time) then
             cheats[#cheats+1] = {
                 rank  = rank,
                 uid   = uid,

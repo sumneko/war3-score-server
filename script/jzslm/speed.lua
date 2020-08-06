@@ -25,7 +25,7 @@ local function checkGroupRecord(redis, data, newScore)
     local uid, class = getGroupUIDandClass(data.players)
     local names = util.unpackList(uid)
     -- 检查作弊
-    if cheat.checkTime(data.time) then
+    if cheat.checkTime(data.level, data.time) then
         cheat.mark(util.unpackList(uid))
         return {
             name   = uid,
@@ -165,7 +165,7 @@ function m.getRank(redis, data)
         local class   = util.unpackList(qClass)
         local players = {}
         -- 过滤作弊
-        if cheat.checkTime(time) then
+        if cheat.checkTime(level, time) then
             names = {'|cffff1111该用户已被封禁，稍后将被移出排行榜，欢迎举报！|r'}
             class = {'无'}
         end
