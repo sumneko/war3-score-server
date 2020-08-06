@@ -18,14 +18,16 @@ local function getGroupUIDandClass(players)
     for _, name in ipairs(names) do
         class[#class+1] = classMap[name]
     end
-    return table.concat(names, ','), table.concat(class, ','), names
+    return table.concat(names, ','), table.concat(class, ',')
 end
 
 function m.markCheat(rds, names)
     for _, name in ipairs(names) do
         if #names == 1 then
+            ngx.log(ngx.WARN, '作弊：', name, ' + 10')
             rds:hincrby(KEY.CHEAT, name, 10)
         else
+            ngx.log(ngx.WARN, '作弊：', name, ' + 1')
             rds:hincrby(KEY.CHEAT, name, 1)
         end
     end
@@ -35,7 +37,7 @@ local function checkGroupRecord(redis, data, newScore)
     local uid, class, names = getGroupUIDandClass(data.players)
     -- 检查作弊
     if data.time <= CHEAT_TIME then
-        m.markCheat(redis, names)
+        m.markCheat(redis, util.unpackList(uid))
         return {
             name   = uid,
             class  = class,
