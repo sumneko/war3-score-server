@@ -23,9 +23,17 @@ end
 
 local function checkGroupRecord(redis, data, newScore)
     local uid, class = getGroupUIDandClass(data.players)
+    local names = util.unpackList(uid)
     -- 检查作弊
     if cheat.checkTime(data.time) then
         cheat.mark(util.unpackList(uid))
+        return {
+            name   = uid,
+            class  = class,
+            result = false,
+        }
+    end
+    if cheat.isBlack(names) then
         return {
             name   = uid,
             class  = class,
@@ -62,13 +70,14 @@ local function checkGroupRecord(redis, data, newScore)
     end
 end
 
-local function checkPlayersRecord(redis, data, newScore)
+local function checkPlayersRecord(redis, data, newScore, suc)
     local results  = {}
     for _, player in pairs(data.players) do
         local name     = player.name
         local class    = player.class
         local oldScore = tonumber((redis:hget(KEY.PLAYER_SCORE, name)))
-        if oldScore and oldScore >= newScore then
+        if (oldScore and oldScore >= newScore)
+        or not suc then
             results[name] = {
                 name   = name,
                 class  = class,
@@ -102,7 +111,7 @@ end
 function m.report(redis, data)
     local score       = data.level * 3600 - data.time -- 每层领先1个小时
     local groupData   = checkGroupRecord(redis, data, score)
-    local playersData = checkPlayersRecord(redis, data, score)
+    local playersData = checkPlayersRecord(redis, data, score, groupData.result)
     return {
         group   = groupData,
         players = playersData,

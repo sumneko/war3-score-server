@@ -5,6 +5,7 @@ local KEY   = require 'script.jzslm.key'
 local money = require 'script.jzslm.money'
 local item  = require 'script.jzslm.item'
 local camp  = require 'script.jzslm.camp'
+local cheat = require 'script.jzslm.cheat'
 local log   = require 'script.log'
 
 local speedReward = {
@@ -173,16 +174,12 @@ local function test(time, date)
     end
     MARK = true
     local red = redis.get()
-    money._add(red, 'WorldEdit', '声望', 10000)
-end
-
-local function checkCheat()
-    local f = log('logs\\cheat.log')
+    --money._add(red, 'WorldEdit', '声望', 10000)
+    cheat.clear()
 end
 
 timer.onTick(function (time, date)
-    --test(time, date)
-    --checkCheat()
+    test(time, date)
 
     if  date.hour == 23
     and date.min == 50
