@@ -23,7 +23,7 @@ function m.buy(rds, data)
         return {
             result   = false,
             error    = 2,
-            money    = money._get(rds, item.currency),
+            money    = money._get(rds, player, item.currency),
             currency = item.currency,
             count    = count,
         }
