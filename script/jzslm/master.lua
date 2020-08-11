@@ -175,11 +175,11 @@ local function test(time, date)
     MARK = true
     local rds = redis.get()
     --money._add(red, 'WorldEdit', '声望', 10000)
-    --cheat.clear()
+    cheat.view()
 end
 
 timer.onTick(function (time, date)
-    --test(time, date)
+    test(time, date)
 
     if  date.hour == 23
     and date.min == 50

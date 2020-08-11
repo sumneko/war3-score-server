@@ -130,4 +130,14 @@ function m.clear()
     f:close()
 end
 
+function m.view()
+    local rds = redis.get()
+    local f = log(('logs\\cheat\\view-%d.log'):format(os.time()))
+    local t = util.hgetall(rds, 'cheat')
+    for k, v in pairs(t) do
+        f:write(k, '\t', v, '\n')
+    end
+    f:close()
+end
+
 return m
